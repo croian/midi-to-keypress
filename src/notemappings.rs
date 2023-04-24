@@ -242,7 +242,7 @@ pub fn get_key(key_name: &str) -> KbdKey {
         "F10" => KbdKey::F10,
         "F11" => KbdKey::F11,
         "F12" => KbdKey::F12,
-         _ => KbdKey::Space,
+         _ => KbdKey::Escape,
     }
 }
 
