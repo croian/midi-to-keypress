@@ -156,6 +156,7 @@ pub enum MidiError {
 impl MidiNote {
     pub fn new(val: u8) -> Result<MidiNote, MidiError> {
         if val > 127 {
+            println!("{}", val);
             return Err(MidiError::NoteOutOfRange);
         }
         use std::mem;

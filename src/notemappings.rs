@@ -9,6 +9,7 @@ use std::io::{BufRead, BufReader, Result};
 pub enum KbdKey {
     /// return key
     Return,
+    // Enter,
     /// tab key (tabulator)
     Tab,
     /// space key
@@ -31,6 +32,7 @@ pub enum KbdKey {
     Control,
     /// home key
     Home,
+    End,
     /// page up key
     PageUp,
     /// page down key
@@ -77,6 +79,7 @@ impl KbdKey {
     pub fn to_enigo_key(obj: &KbdKey) -> Key {
         match *obj {
             KbdKey::Return => Key::Return,
+            // KbdKey::Enter => Key::Enter,
             KbdKey::Tab => Key::Tab,
             KbdKey::Space => Key::Space,
             KbdKey::Backspace => Key::Backspace,
@@ -88,6 +91,7 @@ impl KbdKey {
             KbdKey::Option => Key::Option,
             KbdKey::Control => Key::Control,
             KbdKey::Home => Key::Home,
+            KbdKey::End => Key::End,
             KbdKey::PageUp => Key::PageUp,
             KbdKey::PageDown => Key::PageDown,
             KbdKey::LeftArrow => Key::LeftArrow,
@@ -158,8 +162,9 @@ impl NoteMapping {
         }
     }
 
-    pub fn down_event(key: char, modifier: Option<KbdKey>, _delay: Option<u64>) -> Vec<Event> {
+    pub fn down_event(key: &str, modifier: Option<KbdKey>, _delay: Option<u64>) -> Vec<Event> {
         let mut v = vec![];
+        let len = key.len();
 
         if let Some(ref m) = modifier {
             v.push(Event::NoteMod(Some(m.clone())));
@@ -167,14 +172,21 @@ impl NoteMapping {
             v.push(Event::NoteMod(None));
         }
 
-        v.push(Event::KeyDown(KbdKey::Layout(key)));
+        if len == 1 {
+            v.push(Event::KeyDown(KbdKey::Layout(key.chars().next().unwrap())));
+        }
+        else {
+            v.push(Event::KeyDown(get_key(key)));
+        }
 
         v
     }
 
-    pub fn up_event(key: char, _modifier: Option<KbdKey>, _delay: Option<u64>) -> Vec<Event> {
-        /*
+    pub fn up_event(key: &str, _modifier: Option<KbdKey>, _delay: Option<u64>) -> Vec<Event> {
         let mut v = vec![];
+        let len = key.len();
+
+        /*
                 if let Some(ref m) = modifier {
                     v.push(Event::KeyUp(m.clone()));
                 }
@@ -184,7 +196,53 @@ impl NoteMapping {
                 }
                 v.push(Event::KeyUp(KbdKey::Layout(key)));
         */
-        vec![Event::KeyUp(KbdKey::Layout(key))]
+
+        if len == 1 {
+            v.push(Event::KeyUp(KbdKey::Layout(key.chars().next().unwrap())));
+        }
+        else {
+            v.push(Event::KeyUp(get_key(key)));
+        }
+
+        v
+    }
+}
+
+pub fn get_key(key_name: &str) -> KbdKey {
+    match key_name {
+        // "Enter" => KbdKey::Enter,
+        "Return" => KbdKey::Return,
+        "Tab" => KbdKey::Tab,
+        "Space" => KbdKey::Space,
+        "Backspace" => KbdKey::Backspace,
+        "Escape" => KbdKey::Escape,
+        "Meta" => KbdKey::Meta,
+        "Shift" => KbdKey::Shift,
+        "CapsLock" => KbdKey::CapsLock,
+        "Alt" => KbdKey::Alt,
+        "Option" => KbdKey::Option,
+        "Control" => KbdKey::Control,
+        "Home" => KbdKey::Home,
+        "End" => KbdKey::End,
+        "PageUp" => KbdKey::PageUp,
+        "PageDown" => KbdKey::PageDown,
+        "LeftArrow" => KbdKey::LeftArrow,
+        "RightArrow" => KbdKey::RightArrow,
+        "DownArrow" => KbdKey::DownArrow,
+        "UpArrow" => KbdKey::UpArrow,
+        "F1" => KbdKey::F1,
+        "F2" => KbdKey::F2,
+        "F3" => KbdKey::F3,
+        "F4" => KbdKey::F4,
+        "F5" => KbdKey::F5,
+        "F6" => KbdKey::F6,
+        "F7" => KbdKey::F7,
+        "F8" => KbdKey::F8,
+        "F9" => KbdKey::F9,
+        "F10" => KbdKey::F10,
+        "F11" => KbdKey::F11,
+        "F12" => KbdKey::F12,
+         _ => KbdKey::Space,
     }
 }
 
@@ -233,12 +291,12 @@ impl NoteMappings {
 
             let note = MidiNote::new_from_text(&note_txt).unwrap();
             let channel = channel_txt.parse::<u8>().unwrap();
-            let keydown = keydown_txt.chars().next().unwrap();
-            let keyup = keyup_txt.chars().next().unwrap();
+            // let keydown = keydown_txt.chars().next().unwrap();
+            // let keyup = keyup_txt.chars().next().unwrap();
 
             let mut mapping = NoteMapping::new(note, channel, None);
-            mapping.on = NoteMapping::down_event(keydown, None, None);
-            mapping.off = NoteMapping::up_event(keyup, None, None);
+            mapping.on = NoteMapping::down_event(keydown_txt, None, None);
+            mapping.off = NoteMapping::up_event(keyup_txt, None, None);
 
             println!("Got line: {}  Mapping: {:?}", l, mapping);
             self.add(mapping);
