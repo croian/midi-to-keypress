@@ -237,7 +237,7 @@ fn generate_old_mappings(mappings: &mut NoteMappings) {
         );
 
         note_mapping_mid.on = NoteMapping::down_event(*key, None, None);
-        note_mapping_mid.off = NoteMapping::down_event(*key, None, None);
+        note_mapping_mid.off = NoteMapping::up_event(*key, None, None);
 
         mappings.add(note_mapping_mid);
     }
